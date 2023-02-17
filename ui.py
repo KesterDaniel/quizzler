@@ -13,7 +13,7 @@ class QuizInterface:
         self.score_label = Label(text="Score: 0", background=THEME_COLOR, fg="white")
         self.score_label.grid(row=0, column=2, pady=10)
 
-        self.canvas = Canvas(width=300, height=250)
+        self.canvas = Canvas(width=300, height=250, highlightthickness=0)
         self.question_text = self.canvas.create_text(
             150, 125,
             text="Word on street",
@@ -35,17 +35,26 @@ class QuizInterface:
         self.window.mainloop()
 
     def get_next_question(self):
+        self.canvas.config(bg="white")
         if self.quiz.still_has_questions():
             next_question = self.quiz.next_question()
             self.canvas.itemconfig(self.question_text, text=next_question)
         else:
             self.canvas.itemconfig(self.question_text, text=f"Your final score:\n{self.quiz.score} out of {self.quiz.question_number}")
+            self.true_button.grid_remove()
+            self.false_button.grid_remove()
 
     def correct_answer(self):
-        self.quiz.check_answer("True")
-        self.get_next_question()
+        self.give_feedback(self.quiz.check_answer("True"))
+        # self.get_next_question()
 
     def wrong_answer(self):
-        self.quiz.check_answer("False")
-        self.get_next_question()
+        self.give_feedback(self.quiz.check_answer("False"))
+        # self.get_next_question()
 
+    def give_feedback(self, is_right):
+        if is_right:
+            self.canvas.config(bg="green")
+        if not is_right:
+            self.canvas.config(bg="red")
+        self.window.after(1000, func=self.get_next_question)
